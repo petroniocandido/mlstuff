@@ -1,7 +1,9 @@
+from numpy import random
+
 
 class RouletteWheel(object):
     def __index__(self,**kwargs):
-        pass
+        self.selection_rate = kwargs.get('selection_rate', 1)
 
     def process(self,population):
         pass
@@ -9,7 +11,7 @@ class RouletteWheel(object):
 
 class Tournament(object):
     def __index__(self, **kwargs):
-        pass
+        self.selection_rate = kwargs.get('selection_rate', 1)
 
     def process(self, population):
         pass
