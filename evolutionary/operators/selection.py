@@ -1,8 +1,9 @@
 from numpy import random
+import numpy as np
 
 
 class RouletteWheel(object):
-    def __index__(self,**kwargs):
+    def __init__(self,**kwargs):
         self.selection_rate = kwargs.get('selection_rate', 1)
 
     def process(self,context):
@@ -15,24 +16,31 @@ class RouletteWheel(object):
 
 
 class Tournament(object):
-    def __index__(self, **kwargs):
+    def __init__(self, **kwargs):
         self.selection_rate = kwargs.get('selection_rate', 1)
         self.selection_probability = kwargs.get('selection_probability', 0.7)
+        self.selection_elitism_rate = kwargs.get('selection_elitism_rate', 0.1)
 
     def process(self, context):
+        elit = int(context.population_size * self.selection_elitism_rate)
         num_individuals = int(context.population_size * self.selection_rate)
 
         individuals = []
 
-        for count in range(0, num_individuals):
-            tmp1 = random.randint(0, context.population_size, 1)
-            tmp2 = random.randint(0, context.population_size, 1)
+        for count in np.arange(0, elit):
+            individuals.append(context.population[count])
+
+        for count in np.arange(elit, num_individuals):
+            tmp1 = random.randint(elit, context.population_size, 1)
+            tmp2 = random.randint(elit, context.population_size, 1)
 
             while tmp1 == tmp2:
-                tmp2 = random.randint(0, context.population_size, 1)
+                tmp2 = random.randint(elit, context.population_size, 1)
 
-            individual_best = tmp1 if context.population[tmp1].fitness <= context.population[tmp2].fitness else tmp2
-            individual_worst = tmp2 if individual_best == tmp1 else tmp1
+            individual_best = context.population[tmp1] if context.population[tmp1].fitness <= context.population[tmp2].fitness \
+                else context.population[tmp2]
+            individual_worst = context.population[tmp2] if individual_best.fitness == context.population[tmp1].fitness \
+                else context.population[tmp1]
 
             p = random.uniform(0,1,1)
 
@@ -42,3 +50,4 @@ class Tournament(object):
                 individuals.append(individual_worst)
 
         context.population = individuals
+

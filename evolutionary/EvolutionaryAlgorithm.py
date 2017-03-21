@@ -1,5 +1,8 @@
-from numpy import random
+#!/usr/bin/python
+# -*- coding: utf8 -*-
 
+from numpy import random
+import numpy as np
 
 class EvolutionaryAlgorithm(object):
     def __init__(self, **kwargs):
@@ -11,8 +14,9 @@ class EvolutionaryAlgorithm(object):
         self.max_generations = kwargs.get('max_generations', 500)
         self.operators = []
         self.population = []
-        self.best_fitness = 0
+        self.best_fitness = np.infty
         self.mean_fitness = 0
+        self.generations_without_improvement = 0
         self.best_individuals_size = kwargs.get('best_individuals_size', 1)
         self.best_individuals = []
         self.dump = kwargs.get('dump', True)
@@ -36,14 +40,19 @@ class EvolutionaryAlgorithm(object):
 
     def evaluate_population(self):
         self.mean_fitness = 0
-        self.best_fitness = 10000
         for individual in self.population:
             self.evaluate_individual(individual)
             self.mean_fitness += individual.fitness
-            self.best_fitness = min(self.best_fitness, individual.fitness)
 
-        self.population = sorted(self.population, key=lambda individual: individual.fitness)
-        self.best_individuals = self.population[0:self.best_individuals_size]
+        self.mean_fitness /= self.population_size
+        self.population = sorted(self.population, key=lambda i: i.fitness)
+
+        if self.population[0].fitness < self.best_fitness:
+            self.best_fitness = self.population[0].fitness
+            self.best_individuals = self.population[0:self.best_individuals_size]
+            self.generations_without_improvement = 0
+        else:
+            self.generations_without_improvement += 1
 
     def stop_criteria(self):
         return False
@@ -51,12 +60,12 @@ class EvolutionaryAlgorithm(object):
     def run(self):
         generations = 0
         self.create_initial_population()
-        while generations < self.max_generations and not self.stop_criteria():
+        while generations < self.max_generations  and not self.stop_criteria():
             if self.dump:
-                print('Generation: %s   AVG Fitness: %s   MIN Fitness: %s' % generations, self.mean_fitness, self.best_fitness)
+                print('Generation: {0}   AVG Fitness: {1}   MIN Fitness: {2}'.format(generations, self.mean_fitness, self.best_fitness))
             self.evaluate_population()
             for operator in self.operators:
-                operator.process(self.population)
+                operator.process(self)
             generations += 1
 
 
@@ -73,3 +82,16 @@ class Individual(object):
         self.fitness = 0
         self.variables = variables
         self.objectives = objectives
+
+    def __str__(self):
+        tmp = "Objectives:\n\t"
+        for k in self.objectives.keys():
+            tmp += k + "=" + str(self.objectives[k]) + "\t"
+
+        tmp += "Variables:\n\t"
+        for k in self.variables.keys():
+            tmp += k + "=" + str(self.variables[k]) +"\t"
+
+        tmp += "\nFitness: " + str(self.fitness)
+
+        return tmp

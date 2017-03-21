@@ -1,12 +1,11 @@
+from mlstuff.evolutionary.EvolutionaryAlgorithm import EvolutionaryAlgorithm
+from mlstuff.evolutionary.operators import crossover,selection,mutation
 
-from evolutionary import EvolutionaryAlgorithm
-from evolutionary.operators import crossover,selection,mutation
 
-
-class SimpleRealGA(EvolutionaryAlgorithm.EvolutionaryAlgorithm):
+class SimpleRealGA(EvolutionaryAlgorithm):
     def __init__(self, **kwargs):
-        super(SimpleRealGA, self).__init__(kwargs)
+        super(SimpleRealGA, self).__init__(**kwargs)
 
-        self.operators.append(selection.Tournament(kwargs))
-        self.operators.append(crossover.SinglePointCrossover(kwargs))
-        self.operators.append(mutation.GaussRandomMutation(kwargs))
+        self.operators.append(selection.Tournament(**kwargs))
+        self.operators.append(crossover.SinglePointCrossover(**kwargs))
+        self.operators.append(mutation.GaussRandomMutation(**kwargs))
