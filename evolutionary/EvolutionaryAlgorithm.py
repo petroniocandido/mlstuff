@@ -1,5 +1,6 @@
 from numpy import random
 
+
 class EvolutionaryAlgorithm(object):
     def __init__(self, **kwargs):
         self.objectives_number = kwargs.get('objectives_number',1)
@@ -14,6 +15,7 @@ class EvolutionaryAlgorithm(object):
         self.mean_fitness = 0
         self.best_individuals_size = kwargs.get('best_individuals_size', 1)
         self.best_individuals = []
+        self.dump = kwargs.get('dump', True)
 
     def create_random_individual(self):
         variables = {}
@@ -50,6 +52,8 @@ class EvolutionaryAlgorithm(object):
         generations = 0
         self.create_initial_population()
         while generations < self.max_generations and not self.stop_criteria():
+            if self.dump:
+                print('Generation: %s   AVG Fitness: %s   MIN Fitness: %s' % generations, self.mean_fitness, self.best_fitness)
             self.evaluate_population()
             for operator in self.operators:
                 operator.process(self.population)

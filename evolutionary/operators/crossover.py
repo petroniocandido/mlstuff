@@ -20,27 +20,27 @@ class SinglePointCrossover(object):
             while tmp1 == tmp2:
                 tmp2 = random.randint(0, context.population_size, 1)
 
-            indivualBest = tmp1 if context.population[tmp1].fitness <= context.population[tmp2].fitness else tmp2
-            indivualWorst = tmp2 if indivualBest == tmp1 else tmp1
+            individual_best = tmp1 if context.population[tmp1].fitness <= context.population[tmp2].fitness else tmp2
+            individual_worst = tmp2 if individual_best == tmp1 else tmp1
 
             if direction == 1:
                 for k in range(crossover_point, context.variables_number):
                     var = context.variables[k]
-                    best = indivualBest.variables[var.name]
-                    worst = indivualWorst.variables[var.name]
+                    best = individual_best.variables[var.name]
+                    worst = individual_worst.variables[var.name]
                     new_best = self.crossover_alpha_pol * best + (1-self.crossover_alpha_pol) * worst
                     new_worst = self.crossover_alpha * best + (1 - self.crossover_alpha) * worst
-                    indivualBest.variables[var.name] = new_best
-                    indivualWorst.variables[var.name] = new_worst
+                    individual_best.variables[var.name] = new_best
+                    individual_worst.variables[var.name] = new_worst
             else:
                 for k in range(context.variables_number, crossover_point):
                     var = context.variables[k]
-                    best = indivualBest.variables[var.name]
-                    worst = indivualWorst.variables[var.name]
+                    best = individual_best.variables[var.name]
+                    worst = individual_worst.variables[var.name]
                     new_best = self.crossover_alpha_pol * best + (1-self.crossover_alpha_pol) * worst
                     new_worst = self.crossover_alpha * best + (1 - self.crossover_alpha) * worst
-                    indivualBest.variables[var.name] = new_best
-                    indivualWorst.variables[var.name] = new_worst
+                    individual_best.variables[var.name] = new_best
+                    individual_worst.variables[var.name] = new_worst
 
-            context.population[tmp1] = indivualBest
-            context.population[tmp2] = indivualWorst
+            context.population[tmp1] = individual_best
+            context.population[tmp2] = individual_worst
