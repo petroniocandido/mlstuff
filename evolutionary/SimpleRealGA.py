@@ -7,5 +7,7 @@ class SimpleRealGA(EvolutionaryAlgorithm):
         super(SimpleRealGA, self).__init__(**kwargs)
 
         self.operators.append(selection.Tournament(**kwargs))
+        self.operators.append(selection.Elitism(**kwargs))
         self.operators.append(crossover.SinglePointCrossover(**kwargs))
         self.operators.append(mutation.RealMutation(**kwargs))
+        self.operators.append(mutation.Reboot(**kwargs))

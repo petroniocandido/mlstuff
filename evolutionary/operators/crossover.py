@@ -4,10 +4,19 @@ import numpy as np
 class SinglePointCrossover(object):
     def __init__(self, **kwargs):
         self.crossover_rate = kwargs.get('crossover_rate', 0.9)
+        self.original_crossover_rate = self.crossover_rate
         self.crossover_alpha_pol = kwargs.get('crossover_alpha_pol', 0.9)
         self.crossover_alpha = kwargs.get('crossover_alpha', 0.5)
+        self.crossover_dynamic_rate_increase = kwargs.get('crossover_dynamic_rate_increase', 0.01)
 
     def process(self, context):
+
+        if context.generations_without_improvement > 15:
+            self.crossover_rate = min(self.crossover_rate + self.crossover_dynamic_rate_increase, 1)
+
+        if context.generations_without_improvement == 0:
+            self.crossover_rate = self.original_crossover_rate
+
         num_individuals = int(context.population_size * self.crossover_rate)
 
         for count in np.arange(0,num_individuals, step=2):

@@ -1,5 +1,6 @@
 from numpy import random
 import numpy as np
+from copy import deepcopy
 
 
 class RouletteWheel(object):
@@ -51,3 +52,15 @@ class Tournament(object):
 
         context.population = individuals
 
+
+class Elitism(object):
+    def __init__(self, **kwargs):
+        pass
+
+    def process(self, context):
+        context.population = sorted(context.population, key=lambda i: i.fitness)
+
+        if context.best_individuals_size > 1:
+            context.population[-1 : -context.best_individuals_size-1] = deepcopy(context.best_individuals)
+        else:
+            context.population[-1] = deepcopy(context.best_individuals)

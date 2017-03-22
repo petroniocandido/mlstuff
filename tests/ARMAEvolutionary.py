@@ -14,7 +14,8 @@ def rmse(targets, forecasts):
 class ARMAEvolutionary(SimpleRealGA):
     def __init__(self,p,q,data):
         super(ARMAEvolutionary, self)\
-            .__init__(objectives_number = 1, variables_number = p+q+1, population_size = 50, max_generations = 50,
+            .__init__(objectives_number = 1, variables_number = p+q+1,
+                      best_individuals_size = 3, population_size = 50, max_generations = 250,
                       crossover_rate=0.9, crossover_alpha_pol=0.9, crossover_alpha = 0.5,
                       mutation_rate=0.4, mutation_rand = lambda : np.random.uniform(-5,5),
                       selection_probability=0.7, selection_elitism_rate=0.3)
@@ -25,7 +26,7 @@ class ARMAEvolutionary(SimpleRealGA):
 
         self.variables.append(Variable(name="c", type=float, pmin=min(data),pmax=max(data)))
         for k in np.arange(0,self.p):
-            self.variables.append(Variable(name="ar"+str(k), type=float, pmin=-10, pmax=10))
+            self.variables.append(Variable(name="ar"+str(k), type=float, pmin=-5, pmax=5))
         for k in np.arange(0,self.q):
             self.variables.append(Variable(name="ma"+str(k), type=float, pmin=-10, pmax=10))
 
@@ -55,7 +56,7 @@ os.chdir("/home/petronio/dados/Dropbox/Doutorado/Codigos/")
 sunspotspd = pd.read_csv("DataSets/sunspots.csv", sep=",")
 sunspots = np.array(sunspotspd["SUNACTIVITY"][:])
 
-test = ARMAEvolutionary(3,0,sunspots)
+test = ARMAEvolutionary(2,0,sunspots)
 
 test.run()
 
