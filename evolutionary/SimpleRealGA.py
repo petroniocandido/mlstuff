@@ -10,4 +10,5 @@ class SimpleRealGA(EvolutionaryAlgorithm):
         self.operators.append(selection.Elitism(**kwargs))
         self.operators.append(crossover.SinglePointCrossover(**kwargs))
         self.operators.append(mutation.RealMutation(**kwargs))
+        self.operators.append(mutation.BoundaryMutation(**kwargs))
         self.operators.append(mutation.Reboot(**kwargs))

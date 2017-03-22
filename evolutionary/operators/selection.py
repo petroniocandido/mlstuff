@@ -21,8 +21,13 @@ class Tournament(object):
         self.selection_rate = kwargs.get('selection_rate', 1)
         self.selection_probability = kwargs.get('selection_probability', 0.7)
         self.selection_elitism_rate = kwargs.get('selection_elitism_rate', 0.1)
+        self.tournament_enable = kwargs.get('tournament_enable', lambda c: True)
 
     def process(self, context):
+
+        if not self.tournament_enable(context):
+            return
+
         elit = int(context.population_size * self.selection_elitism_rate)
         num_individuals = int(context.population_size * self.selection_rate)
 
@@ -55,9 +60,13 @@ class Tournament(object):
 
 class Elitism(object):
     def __init__(self, **kwargs):
-        pass
+        self.elitism_enable = kwargs.get('elitism_enable', lambda c: True)
 
     def process(self, context):
+
+        if not self.elitism_enable(context):
+            return
+
         context.population = sorted(context.population, key=lambda i: i.fitness)
 
         if context.best_individuals_size > 1:

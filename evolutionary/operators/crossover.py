@@ -3,6 +3,7 @@ import numpy as np
 
 class SinglePointCrossover(object):
     def __init__(self, **kwargs):
+        self.singlepointcrossover_enable = kwargs.get('singlepointcrossover_enable', lambda c: True)
         self.crossover_rate = kwargs.get('crossover_rate', 0.9)
         self.original_crossover_rate = self.crossover_rate
         self.crossover_alpha_pol = kwargs.get('crossover_alpha_pol', 0.9)
@@ -10,6 +11,9 @@ class SinglePointCrossover(object):
         self.crossover_dynamic_rate_increase = kwargs.get('crossover_dynamic_rate_increase', 0.01)
 
     def process(self, context):
+
+        if not self.singlepointcrossover_enable(context):
+            return
 
         if context.generations_without_improvement > 15:
             self.crossover_rate = min(self.crossover_rate + self.crossover_dynamic_rate_increase, 1)

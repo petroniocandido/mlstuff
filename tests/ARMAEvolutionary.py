@@ -3,6 +3,7 @@
 
 from mlstuff.evolutionary.EvolutionaryAlgorithm import Variable
 from mlstuff.evolutionary.SimpleRealGA import SimpleRealGA
+from mlstuff.evolutionary.EvolutionaryBoost import EvolutionaryBoost
 import numpy as np
 import os
 import pandas as pd
@@ -11,14 +12,18 @@ import pandas as pd
 def rmse(targets, forecasts):
     return np.sqrt(np.nanmean((targets - forecasts) ** 2))
 
+
+def residual_mean(targets, forecasts):
+    return np.nanmean(targets - forecasts)
+
+
 class ARMAEvolutionary(SimpleRealGA):
-    def __init__(self,p,q,data):
+    def __init__(self,p,q,data,**kwargs):
         super(ARMAEvolutionary, self)\
-            .__init__(objectives_number = 1, variables_number = p+q+1,
-                      best_individuals_size = 3, population_size = 50, max_generations = 250,
+            .__init__(objectives_number = 1, variables_number = p+q+1, best_individuals_size = 2,
                       crossover_rate=0.9, crossover_alpha_pol=0.9, crossover_alpha = 0.5,
                       mutation_rate=0.4, mutation_rand = lambda : np.random.uniform(-5,5),
-                      selection_probability=0.7, selection_elitism_rate=0.3)
+                      selection_probability=0.7, selection_elitism_rate=0.3, **kwargs)
 
         self.p = p
         self.q = q
@@ -46,7 +51,7 @@ class ARMAEvolutionary(SimpleRealGA):
             self.arma(individual, self.data[k-self.p: k])
             forecasts.append(individual.objectives['y'])
 
-        individual.fitness = rmse(self.data[self.p:],forecasts)
+        individual.fitness = rmse(self.data[self.p:],forecasts) + (residual_mean(self.data[self.p:],forecasts) ** 2)
 
     def stop_criteria(self):
         return self.best_fitness == 0
@@ -56,9 +61,18 @@ os.chdir("/home/petronio/dados/Dropbox/Doutorado/Codigos/")
 sunspotspd = pd.read_csv("DataSets/sunspots.csv", sep=",")
 sunspots = np.array(sunspotspd["SUNACTIVITY"][:])
 
-test = ARMAEvolutionary(2,0,sunspots)
+model = lambda **k: ARMAEvolutionary(2,0,sunspots,**k)
 
-test.run()
+eb = EvolutionaryBoost(model,iterations=20,population_size=20,max_generations=250)
 
-for i in test.best_individuals:
+best = eb.run()
+
+for i in best:
     print(i)
+
+#test = ARMAEvolutionary(2,0,sunspots)
+
+#test.run()
+
+#for i in test.best_individuals:
+#    print(i)

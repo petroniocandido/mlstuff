@@ -22,6 +22,7 @@ class EvolutionaryAlgorithm(object):
         self.best_individuals_size = kwargs.get('best_individuals_size', 1)
         self.best_individuals = []
         self.dump = kwargs.get('dump', True)
+        self.initial_population = kwargs.get('initial_population', None)
 
     def create_random_individual(self):
         variables = {}
@@ -39,7 +40,10 @@ class EvolutionaryAlgorithm(object):
         return tmp
 
     def create_initial_population(self):
-        self.population = [self.create_random_individual() for k in range(0, self.population_size) ]
+        if self.initial_population is not None and self.generations_without_improvement == 0:
+            self.population = self.initial_population
+        else:
+            self.population = [self.create_random_individual() for k in range(0, self.population_size) ]
 
     def check_individual_constraints(self, individual):
         for var in self.variables:
@@ -78,7 +82,8 @@ class EvolutionaryAlgorithm(object):
     def run(self):
         generations = 0
         self.create_initial_population()
-        while generations < self.max_generations  and not self.stop_criteria():
+        while generations < self.max_generations and self.generations_without_improvement < 50 \
+                and not self.stop_criteria():
             if self.dump:
                 print('Generation: {0}   AVG Fitness: {1}   MIN Fitness: {2}'
                       .format(generations, self.mean_fitness, self.best_fitness))
