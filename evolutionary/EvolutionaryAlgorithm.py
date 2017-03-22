@@ -3,6 +3,8 @@
 
 from numpy import random
 import numpy as np
+from copy import deepcopy
+
 
 class EvolutionaryAlgorithm(object):
     def __init__(self, **kwargs):
@@ -25,15 +27,31 @@ class EvolutionaryAlgorithm(object):
         variables = {}
         objectives = {}
         for var in self.variables:
-            variables[var.name] = random.uniform(var.min, var.max, 1)
+            variables[var.name] = random.uniform(var.min, var.max)
 
         for var in self.objectives:
             objectives[var.name] = 0
 
-        return Individual(variables,objectives)
+        tmp = Individual(variables,objectives)
+
+        self.check_individual_constraints(tmp)
+
+        return tmp
 
     def create_initial_population(self):
         self.population = [self.create_random_individual() for k in range(0, self.population_size) ]
+
+    def check_individual_constraints(self, individual):
+        for var in self.variables:
+            if var.max is not None and individual.variables[var.name] > var.max:
+                individual.variables[var.name] = var.max
+
+            if var.min is not None and individual.variables[var.name] < var.min:
+                individual.variables[var.name] = var.min
+
+    def check_population_constraints(self):
+        for individual in self.population:
+            self.check_individual_constraints(individual)
 
     def evaluate_individual(self,individual):
         pass
@@ -49,7 +67,7 @@ class EvolutionaryAlgorithm(object):
 
         if self.population[0].fitness < self.best_fitness:
             self.best_fitness = self.population[0].fitness
-            self.best_individuals = self.population[0:self.best_individuals_size]
+            self.best_individuals = deepcopy(self.population[0:self.best_individuals_size])
             self.generations_without_improvement = 0
         else:
             self.generations_without_improvement += 1
@@ -62,10 +80,14 @@ class EvolutionaryAlgorithm(object):
         self.create_initial_population()
         while generations < self.max_generations  and not self.stop_criteria():
             if self.dump:
-                print('Generation: {0}   AVG Fitness: {1}   MIN Fitness: {2}'.format(generations, self.mean_fitness, self.best_fitness))
+                print('Generation: {0}   AVG Fitness: {1}   MIN Fitness: {2}'
+                      .format(generations, self.mean_fitness, self.best_fitness))
             self.evaluate_population()
             for operator in self.operators:
                 operator.process(self)
+
+            self.check_population_constraints()
+
             generations += 1
 
 
@@ -86,12 +108,12 @@ class Individual(object):
     def __str__(self):
         tmp = "Objectives:\n\t"
         for k in self.objectives.keys():
-            tmp += k + "=" + str(self.objectives[k]) + "\t"
+            tmp += '{0} = {1} \t'.format(k,self.objectives[k])
 
-        tmp += "Variables:\n\t"
+        tmp += "\nVariables:\n\t"
         for k in self.variables.keys():
-            tmp += k + "=" + str(self.variables[k]) +"\t"
+            tmp += '{0} = {1} \t'.format(k,self.variables[k])
 
-        tmp += "\nFitness: " + str(self.fitness)
+        tmp += '\nFitness: {0}'.format(self.fitness)
 
         return tmp

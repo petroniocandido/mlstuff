@@ -11,14 +11,14 @@ class SinglePointCrossover(object):
         num_individuals = int(context.population_size * self.crossover_rate)
 
         for count in np.arange(0,num_individuals, step=2):
-            direction = random.randint(0,1,1)
-            crossover_point = random.randint(0, context.variables_number, 1)
+            direction = random.randint(0,2)
+            crossover_point = random.randint(0, context.variables_number)
 
-            tmp1 = random.randint(0, context.population_size, 1)
-            tmp2 = random.randint(0, context.population_size, 1)
+            tmp1 = random.randint(0, context.population_size)
+            tmp2 = random.randint(0, context.population_size)
 
             while tmp1 == tmp2:
-                tmp2 = random.randint(0, context.population_size, 1)
+                tmp2 = random.randint(0, context.population_size)
 
             individual_best = context.population[tmp1] if context.population[tmp1].fitness <= context.population[tmp2].fitness \
                 else context.population[tmp2]
@@ -35,7 +35,7 @@ class SinglePointCrossover(object):
                     individual_best.variables[var.name] = new_best
                     individual_worst.variables[var.name] = new_worst
             else:
-                for k in np.arange(context.variables_number, crossover_point):
+                for k in np.arange(context.variables_number-1, crossover_point-1, step=-1):
                     var = context.variables[k]
                     best = individual_best.variables[var.name]
                     worst = individual_worst.variables[var.name]

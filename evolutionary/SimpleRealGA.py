@@ -8,4 +8,4 @@ class SimpleRealGA(EvolutionaryAlgorithm):
 
         self.operators.append(selection.Tournament(**kwargs))
         self.operators.append(crossover.SinglePointCrossover(**kwargs))
-        self.operators.append(mutation.GaussRandomMutation(**kwargs))
+        self.operators.append(mutation.RealMutation(**kwargs))
