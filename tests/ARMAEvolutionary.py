@@ -7,6 +7,8 @@ from mlstuff.evolutionary.EvolutionaryBoost import EvolutionaryBoost
 import numpy as np
 import os
 import pandas as pd
+import numpy.random as random
+import time
 
 
 def rmse(targets, forecasts):
@@ -56,16 +58,33 @@ class ARMAEvolutionary(SimpleRealGA):
     def stop_criteria(self):
         return self.best_fitness == 0
 
-os.chdir("/home/petronio/dados/Dropbox/Doutorado/Codigos/")
+def parallel_method(**kwargs):
+    os.chdir("/home/petronio/dados/Dropbox/Doutorado/Codigos/")
 
-sunspotspd = pd.read_csv("DataSets/sunspots.csv", sep=",")
-sunspots = np.array(sunspotspd["SUNACTIVITY"][:])
+    sunspotspd = pd.read_csv("DataSets/sunspots.csv", sep=",")
+    sunspots = np.array(sunspotspd["SUNACTIVITY"][:])
 
-model = lambda **k: ARMAEvolutionary(2,0,sunspots,**k)
+    instance = kwargs['instance']
 
-eb = EvolutionaryBoost(model,iterations=20,population_size=20,max_generations=250)
+    time.sleep(0.5*instance)
 
-best = eb.run()
+    model = ARMAEvolutionary(2,0,sunspots,**kwargs)
+    model.run()
+
+    print('Instance: {0}    Fitness: {1}'.format(instance, model.best_individuals[0].fitness))
+
+    return model.best_individuals
+
+#os.chdir("/home/petronio/dados/Dropbox/Doutorado/Codigos/")
+
+#sunspotspd = pd.read_csv("DataSets/sunspots.csv", sep=",")
+#sunspots = np.array(sunspotspd["SUNACTIVITY"][:])
+
+#model = lambda **k: ARMAEvolutionary(2,0,sunspots,**k)
+
+eb = EvolutionaryBoost(None,iterations=20,population_size=20,max_generations=250)
+
+best = eb.runParallel(parallel_method)
 
 for i in best:
     print(i)
