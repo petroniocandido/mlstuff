@@ -71,7 +71,10 @@ class EvolutionaryAlgorithm(object):
 
         if self.population[0].fitness < self.best_fitness:
             self.best_fitness = self.population[0].fitness
-            self.best_individuals = deepcopy(self.population[0:self.best_individuals_size])
+            for x in self.population[0:self.best_individuals_size]:
+                self.best_individuals.append(deepcopy(x))
+            self.best_individuals = sorted(self.best_individuals, key=lambda i: i.fitness)
+            self.best_individuals = deepcopy(self.best_individuals[0:self.best_individuals_size])
             self.generations_without_improvement = 0
         else:
             self.generations_without_improvement += 1

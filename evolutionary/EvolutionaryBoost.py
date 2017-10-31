@@ -48,9 +48,13 @@ class EvolutionaryBoost(object):
 
     def runParallel(self, parallel_method):
 
+        return self.runParallelStochastic(parallel_method, parallel_method)
+
+    def runParallelStochastic(self, parallel_method_sample, parallel_method_full):
+
         num_cores = multiprocessing.cpu_count()
 
-        best_individuals = Parallel(n_jobs=num_cores)(delayed(parallel_method)
+        best_individuals = Parallel(n_jobs=num_cores)(delayed(parallel_method_sample)
                                                       (**{'population_size': self.population_size, 'max_generations': self.max_generations,
                                                           'dump': False, 'instance':i })
                                                       for i in np.arange(0,self.iterations))
@@ -63,7 +67,7 @@ class EvolutionaryBoost(object):
 
         final_individuals = []
 
-        final_individuals = Parallel(n_jobs=num_cores)(delayed(parallel_method)
+        final_individuals = Parallel(n_jobs=num_cores)(delayed(parallel_method_full)
                                                       (**{'population_size': self.population_size, 'max_generations': self.max_generations,
                                                           'dump': False, 'initial_population': deepcopy(best_individuals), \
                                                           'instance': i})
