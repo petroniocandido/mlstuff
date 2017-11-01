@@ -1,55 +1,43 @@
 import numpy as np
+import mlstuff.conexionist.function as func
 
 
-class Activation(object):
-
-    def __init__(self, **kwargs):
-        self.name = kwargs.get('name',None)
-
-    def function(self, data):
-        pass
-
-    def derivative(self, data):
-        pass
-
-
-class BinaryStep(Activation):
+class Identity(func.UnivariateFunction):
     def __init__(self, **kwargs):
         super(BinaryStep, self).__init__(name='Binary Step', **kwargs)
 
     def function(self, data):
-        if isinstance(data, (list, set, np.array)):
-            return [ 1 if k >= 0 else 0 for k in data]
-        else:
-            return 1 if data >= 0 else 0
+        return data
 
     def derivative(self, data):
-        if isinstance(data, (list, set, np.array)):
-            return [ 0 for k in data]
-        else:
-            return 0 if data >= 0 else 0
+        return 1
 
 
-class Linear(Activation):
+class BinaryStep(func.UnivariateFunction):
+    def __init__(self, **kwargs):
+        super(BinaryStep, self).__init__(name='Binary Step', **kwargs)
+
+    def function(self, data):
+        return 1 if data >= 0 else 0
+
+    def derivative(self, data):
+        return 0 if data >= 0 else 0
+
+
+class Linear(func.UnivariateFunction):
     def __init__(self, **kwargs):
         super(BinaryStep, self).__init__(name='Linear', **kwargs)
         self.a = kwargs.get('coefficient', 1)
         self.b = kwargs.get('threshold', 0)
 
     def function(self, data):
-        if isinstance(data, (list, set, np.array)):
-            return [ self.a*x + self.b for x in data]
-        else:
-            return self.a*data + self.b
+        return self.a*data + self.b
 
     def derivative(self, data):
-        if isinstance(data, (list, set, np.array)):
-            return [ self.a for k in data]
-        else:
-            return self.a
+        return self.a
 
 
-class Sigmoid(Activation):
+class Sigmoid(func.UnivariateFunction):
     def __init__(self, **kwargs):
         super(Sigmoid, self).__init__(name='Sigmoid', **kwargs)
 
@@ -61,7 +49,7 @@ class Sigmoid(Activation):
         return  k * (1 - k)
 
 
-class TanH(Activation):
+class TanH(func.UnivariateFunction):
     def __init__(self, **kwargs):
         super(TanH, self).__init__(name='Hyperbolic Tangent', **kwargs)
 
@@ -73,7 +61,7 @@ class TanH(Activation):
         return  1 - k**2
 
 
-class ReLu(Activation):
+class ReLu(func.UnivariateFunction):
     def __init__(self, **kwargs):
         super(ReLu, self).__init__(name='Rectified linear unit', **kwargs)
 
@@ -84,7 +72,7 @@ class ReLu(Activation):
         return  1 if data >= 0 else 0
 
 
-class LeakyReLu(Activation):
+class LeakyReLu(func.UnivariateFunction):
     def __init__(self, **kwargs):
         super(LeakyReLu, self).__init__(name='Leaky Rectified linear unit', **kwargs)
         self.a = kwargs.get('a', .01)
@@ -96,7 +84,7 @@ class LeakyReLu(Activation):
         return self.a if data < 0 else 1
 
 
-class Softmax(Activation):
+class Softmax(func.UnivariateFunction):
     def __init__(self, **kwargs):
         super(Softmax, self).__init__(name='Softmax', **kwargs)
 
@@ -106,4 +94,13 @@ class Softmax(Activation):
         return [k/Z for k in tmp]
 
     def derivative(self, data):
-        return self.a if data < 0 else 1
+        ret = []
+        for i,pi in enumerate(data):
+            tmp = []
+            for j, pj in enumerate(data):
+                if i == j:
+                    tmp.append(self.function(pi)*(1-self.function(pj)))
+                else:
+                    tmp.append(- self.function(pi) * self.function(pj))
+            ret.append(tmp)
+        return ret
